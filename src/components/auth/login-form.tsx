@@ -6,6 +6,7 @@ import { FieldError } from "@/components/auth";
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { loginAction } from "@/action/auth.action";
 
 export function LoginForm() {
   const {
@@ -20,7 +21,15 @@ export function LoginForm() {
 
   async function submitHandler(data: loginType) {
     setTransition(async () => {
-      toast.success(data.email);
+      try {
+        const { isError, message } = await loginAction(data);
+        if (isError) throw Error(message);
+        toast.success(message);
+        reset();
+        router.push("/");
+      } catch (error: any) {
+        toast.error(error.message);
+      }
     });
   }
 

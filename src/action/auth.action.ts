@@ -1,7 +1,13 @@
 "use server";
 
 import { createClient } from "@/libs/supabase/server";
-import { registerSchema, registerType } from "@/types/auth.types";
+import {
+  loginSchema,
+  loginType,
+  registerSchema,
+  registerType,
+} from "@/types/auth.types";
+import { redirect } from "next/navigation";
 
 export async function registerAction(data: registerType) {
   const validatedData = registerSchema.safeParse(data);
@@ -51,4 +57,40 @@ export async function registerAction(data: registerType) {
     isError: false,
     message: "Registered successfully!",
   };
+}
+
+export async function loginAction(data: loginType) {
+  const validatedData = loginSchema.safeParse(data);
+  if (!validatedData.success) {
+    return {
+      isError: true,
+      message: "Invalid fields!",
+    };
+  }
+
+  const { email, password } = validatedData.data;
+
+  const supabase = createClient();
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) {
+    return {
+      isError: true,
+      message: error.message,
+    };
+  }
+  return {
+    isError: false,
+    message: "Welcome back!",
+  };
+}
+
+export async function logoutAction() {
+  const supabase = createClient();
+  await supabase.auth.signOut();
+  redirect("/login");
 }
