@@ -1,3 +1,4 @@
+import { AuthFooter, AuthHeader, RegisterForm } from "@/components/auth";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -7,7 +8,12 @@ export const metadata: Metadata = {
 export default function RegisterPage() {
   return (
     <main>
-      <h1>Register page</h1>
+      <AuthHeader title="Register" description="create account to continue" />
+      <RegisterForm />
+      <AuthFooter
+        href="/login"
+        description="already have account ? Login here"
+      />
     </main>
   );
 }
