@@ -1,5 +1,6 @@
 "use client";
 
+import { logoutAction } from "@/action/auth.action";
 import { useTransition } from "react";
 
 export function LogoutButton() {
@@ -7,7 +8,7 @@ export function LogoutButton() {
 
   function clickHandler() {
     setTransition(async () => {
-      alert("hello world!");
+      await logoutAction();
     });
   }
   return (

@@ -94,3 +94,33 @@ export async function logoutAction() {
   await supabase.auth.signOut();
   redirect("/login");
 }
+
+export async function getCurrentUserAction() {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data } = await supabase
+    .from("user")
+    .select(
+      `
+    name,
+    username,
+    email,
+    avatar_url,
+    bio
+    `
+    )
+    .eq("id", user.id)
+    .single();
+  if (!data) {
+    redirect("/login");
+  }
+
+  return data;
+}
