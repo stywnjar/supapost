@@ -6,6 +6,7 @@ import { FieldError } from "@/components/auth";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { registerAction } from "@/action/auth.action";
 
 export function RegisterForm() {
   const {
@@ -20,7 +21,14 @@ export function RegisterForm() {
 
   async function submitHandler(data: registerType) {
     setTransition(async () => {
-      toast.success(data.email);
+      try {
+        const { isError, message } = await registerAction(data);
+        if (isError) throw Error(message);
+        toast.success(message);
+        router.push("/");
+      } catch (error: any) {
+        toast.error(error.message);
+      }
     });
   }
 
