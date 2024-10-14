@@ -4,7 +4,7 @@ import { LogoutButton } from "@/components/auth";
 export default async function Page() {
   const { name, username, avatar_url } = await getCurrentUserAction();
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center gap-3">
+    <main className="flex flex-col items-center justify-center gap-3">
       <div>
         <img
           src={avatar_url}
