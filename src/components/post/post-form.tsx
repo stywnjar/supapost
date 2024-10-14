@@ -1,10 +1,15 @@
 "use client";
+import { createPostAction } from "@/action/post.action";
+import { createClient } from "@/libs/supabase/client";
 import { Camera } from "lucide-react";
-import { useRef, useState } from "react";
+import { useRef, useState, useTransition } from "react";
+import { toast } from "sonner";
 
 export function PostForm() {
   const [imagePick, setImagePick] = useState<File | null>(null);
+  const [isLoading, setTransition] = useTransition();
   const fileRef = useRef<HTMLInputElement | null>(null);
+  const formRef = useRef<HTMLFormElement | null>(null);
 
   function imagePickHandler(e: React.ChangeEvent<HTMLInputElement>) {
     if (!e.target.files) return;
@@ -12,11 +17,58 @@ export function PostForm() {
     setImagePick(e.target.files[0]);
   }
 
+  async function imageUpload(image: File) {
+    const supabase = createClient();
+    const { error } = await supabase.storage
+      .from("supapost")
+      .upload(`post/${image.name}`, image);
+    if (error) {
+      console.log(error);
+    }
+    const { data } = supabase.storage
+      .from("supapost")
+      .getPublicUrl(`post/${image.name}`);
+
+    return data;
+  }
+  function submitHandler(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const content = String(formData.get("content"));
+
+    if (content.length < 1) return toast.error("Cannot submit empty content!");
+    setTransition(async () => {
+      try {
+        if (imagePick) {
+          const imageUrl = await imageUpload(imagePick);
+          const { isError, message } = await createPostAction({
+            content,
+            image: imageUrl.publicUrl,
+          });
+          if (isError) throw Error(message);
+          toast.success(message);
+          formRef.current?.reset();
+          setImagePick(null);
+          return;
+        }
+        const { isError, message } = await createPostAction({
+          content,
+          image: null,
+        });
+        if (isError) throw Error(message);
+        toast.success(message);
+        formRef.current?.reset();
+      } catch (error: any) {
+        toast.error(error.message);
+      }
+    });
+  }
+
   return (
-    <form>
-      <fieldset className="flex flex-col gap-2">
+    <form onSubmit={submitHandler} ref={formRef}>
+      <fieldset disabled={isLoading} className="flex flex-col gap-2">
         <textarea
-          required
+          name="content"
           className="w-full p-4 h-48 rounded-md bg-transparent border border-white/10 resize-none outline-none"
         />
         {imagePick && (
@@ -68,7 +120,9 @@ export function PostForm() {
           >
             <Camera />
           </button>
-          <button className="btn btn-outline btn-sm">Post</button>
+          <button className="btn btn-outline btn-sm">
+            {isLoading && <span className="loading loading-sm" />}Post
+          </button>
         </div>
       </fieldset>
     </form>
