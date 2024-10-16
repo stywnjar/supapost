@@ -32,3 +32,14 @@ export async function createPostAction({ content, image }: CreatePostArgs) {
     message: "Posted successfully!",
   };
 }
+
+export async function getAllPostAction() {
+  const supabase = createClient();
+  const { data } = await supabase.from("post").select(
+    `
+      *,
+      user(name,username,avatar_url)
+    `,
+  ).order("created_at", { ascending: false });
+  return data;
+}

@@ -1,20 +1,38 @@
-import { getCurrentUserAction } from "@/action/auth.action";
-import { LogoutButton } from "@/components/auth";
+import { getAllPostAction } from "@/action/post.action";
 
 export default async function Page() {
-  const { name, username, avatar_url } = await getCurrentUserAction();
+  const posts = await getAllPostAction();
   return (
     <main className="flex flex-col items-center justify-center gap-3">
-      <div>
-        <img
-          src={avatar_url}
-          alt={username}
-          className="w-40 h-40 rounded-full"
-        />
-      </div>
-      <h1 className="font-bold text-3xl">{name}</h1>
-      <p>{username}</p>
-      <LogoutButton />
+      <section className="flex flex-col gap-5">
+        {posts?.map((post) => (
+          <div key={post.id}>
+            <div className="flex items-center gap-2">
+              <img
+                src={post.user?.avatar_url}
+                alt={post.user?.name}
+                className="h-10 w-10 rounded-full "
+              />
+              <div>
+                <h5 className="font-semibold">{post.user?.name}</h5>
+                <p className="text-white/50 font-light -mt-1">
+                  {post.user?.username}
+                </p>
+              </div>
+            </div>
+            <div className="ml-5 my-2 pl-7 py-5 border-l border-white/10">
+              {post.image ? (
+                <img
+                  src={post.image}
+                  alt={post.user?.username}
+                  className="rounded-md mb-2"
+                />
+              ) : null}
+              <p className="whitespace-pre-line">{post.content}</p>
+            </div>
+          </div>
+        ))}
+      </section>
     </main>
   );
 }
