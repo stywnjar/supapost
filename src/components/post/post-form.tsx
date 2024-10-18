@@ -2,6 +2,7 @@
 import { createPostAction } from "@/action/post.action";
 import { createClient } from "@/libs/supabase/client";
 import { Camera } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 
@@ -10,6 +11,7 @@ export function PostForm() {
   const [isLoading, setTransition] = useTransition();
   const fileRef = useRef<HTMLInputElement | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
+  const router = useRouter();
 
   function imagePickHandler(e: React.ChangeEvent<HTMLInputElement>) {
     if (!e.target.files) return;
@@ -49,6 +51,7 @@ export function PostForm() {
           toast.success(message);
           formRef.current?.reset();
           setImagePick(null);
+          router.push("/");
           return;
         }
         const { isError, message } = await createPostAction({
@@ -58,6 +61,7 @@ export function PostForm() {
         if (isError) throw Error(message);
         toast.success(message);
         formRef.current?.reset();
+        router.push("/");
       } catch (error: any) {
         toast.error(error.message);
       }
